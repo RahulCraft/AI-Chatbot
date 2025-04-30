@@ -236,43 +236,54 @@
         const typingIndicator = document.getElementById("typing-indicator");
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
-
+    
         window.onload = () => {
             addBotMessage("Hi there! 👋");
             addBotMessage("Welcome to ONE AIM Chat Assistant!");
             addBotMessage("How can I help you today?");
             showOptions();
         };
-
+    
         function addBotMessage(message) {
             chatBox.innerHTML += `<div class='message bot'>${message}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-
+    
         function addUserMessage(message) {
             chatBox.innerHTML += `<div class='message user'>${message}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-
+    
         function showOptions() {
-            // No options to display
+            // No options to display yet
         }
-
+    
         function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
-
+    
             addUserMessage(message);
             userInput.value = "";
             sendBtn.disabled = true;
             typingIndicator.style.display = "flex";
-
+    
             fetch("/chat/", {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
                 body: `message=${encodeURIComponent(message)}`
             })
-                .then(res => res.json())
+                .then(async res => {
+                    const contentType = res.headers.get("content-type");
+                    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+                    if (contentType && contentType.includes("application/json")) {
+                        return res.json();
+                    } else {
+                        const text = await res.text();
+                        throw new Error("Unexpected response: " + text);
+                    }
+                })
                 .then(data => {
                     typingIndicator.style.display = "none";
                     sendBtn.disabled = false;
@@ -291,16 +302,16 @@
                     addBotMessage("⚠️ Error: " + err.message);
                 });
         }
-
+    
         function handleOptionClick(optionText) {
             userInput.value = optionText;
             sendMessage();
         }
-
+    
         function closeChat() {
             document.querySelector('.chat-container').style.display = 'none';
         }
-
+    
         userInput.addEventListener("keypress", function (e) {
             if (e.key === "Enter") {
                 e.preventDefault();
@@ -308,6 +319,7 @@
             }
         });
     </script>
+    
 
 </body>
 
