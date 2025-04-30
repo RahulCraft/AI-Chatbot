@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from .models import ChatMessage
+import traceback
 import os
 from dotenv import load_dotenv
 from openai import OpenAI  # ✅ new import
@@ -80,6 +81,7 @@ def chat(request):
                 )
                 bot_reply = response.choices[0].message.content.strip()
             except Exception as e:
+                print("Error in OpenAI call:", traceback.format_exc())
                 bot_reply = f"Sorry, something went wrong: {str(e)}"
 
         ChatMessage.objects.create(user_message=user_message, bot_response=bot_reply)
