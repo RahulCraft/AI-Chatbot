@@ -14,7 +14,7 @@ def home(request):
     return render(request, 'index.html')
 
 @csrf_exempt
-def chatbot_response(request):
+def chat(request):
     if request.method == 'POST':
         user_message = request.POST.get('message', '')
 
@@ -78,10 +78,11 @@ def chatbot_response(request):
                     model="gpt-3.5-turbo-0125",
                     messages=[{"role": "user", "content": user_message}]
                 )
-                bot_reply = response.choices[0].message.content
+                bot_reply = response.choices[0].message.content.strip()
             except Exception as e:
                 bot_reply = f"Sorry, something went wrong: {str(e)}"
 
         ChatMessage.objects.create(user_message=user_message, bot_response=bot_reply)
 
         return JsonResponse({'reply': bot_reply})
+    return JsonResponse({'reply': 'Invalid request method.'}, status=400)
