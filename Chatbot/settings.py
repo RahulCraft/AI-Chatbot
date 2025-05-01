@@ -66,14 +66,14 @@ WSGI_APPLICATION = 'Chatbot.wsgi.application'
 
 # Database
 DATABASES = {
-    'default': {
+     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'chatbot_oneaim'),
-        'USER': os.getenv('DB_USER', 'root'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'Abcd#^1234'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '3306'),
-    }
+        'NAME': os.environ.get('DB_NAME', 'database_chatbot_oneaim'),
+        'USER': os.environ.get('DB_USER', 'admin_chatbot'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'thechatbot03'),
+        'HOST': os.environ.get('DB_HOST', 'database-chatbot-oneaim.c5g0qwsu6m3a.ap-south-1.rds.amazonaws.com'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
+     }
 }
 
 
