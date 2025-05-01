@@ -68,7 +68,7 @@ WSGI_APPLICATION = 'Chatbot.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'chatbot_db'),
+        'NAME': os.getenv('DB_NAME', 'chatbot_oneaim'),
         'USER': os.getenv('DB_USER', 'root'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'Abcd#^1234'),
         'HOST': os.getenv('DB_HOST', 'localhost'),
