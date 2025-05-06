@@ -66,7 +66,7 @@ def chat(request):
                           ✨ <a href='https://theoneaim.in' target='_blank'>Discover how our services can transform your business →</a>""",
            
             # Cloud Services
-            "cloud services": """☁️ <b>Cloud Services</b><br>
+            "cloud services ": """☁️ <b>Cloud Services</b><br>
                                  We help businesses scale with secure, cost-effective cloud solutions.<br><br>
                                  - Cloud Migration<br>
                                  - DevOps & Automation<br>
@@ -313,17 +313,25 @@ def chat(request):
  
         }
 
+        # Lowercase user message
+        user_message_lower = user_message.lower()
+
+        # Sort predefined_keywords by keyword length (descending)
+        sorted_keywords = sorted(predefined_keywords.items(), key=lambda x: len(x[0]), reverse=True)
+
         # Matching logic — check if any keyword is in the user message
         matched = False
-        for keyword, answer in predefined_keywords.items():
-            if keyword in user_message:
+        for keyword, answer in sorted_keywords:
+            if keyword.lower() in user_message_lower:
                 bot_reply = answer
                 matched = True
                 break
 
         # Fallback if nothing matched
         if not matched:
-            bot_reply = "Something went wrong. Please only ask about One Aim IT Solutions."
+            #bot_reply = "Something went wrong. Please only ask about One Aim IT Solutions."
+            bot_reply = """Thanks for your question! We provide real-time information about One Aim IT Solutions—our services, solutions, and company updates. For other queries, 
+                           please <a href='https://theoneaim.in/contact' target='_blank'>contact our team here</a>."""
 
         # ✅ Save to database
         ChatMessage.objects.create(user_message=user_message, bot_response=bot_reply)
