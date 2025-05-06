@@ -2,14 +2,6 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from .models import ChatMessage
-import traceback
-import os
-from dotenv import load_dotenv
-from openai import OpenAI  # ✅ new import
-
-load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=openai_api_key)  # ✅ new client object
 
 def home(request):
     return render(request, 'index.html')
@@ -17,9 +9,11 @@ def home(request):
 @csrf_exempt
 def chat(request):
     if request.method == 'POST':
-        user_message = request.POST.get('message', '')
+        user_message = request.POST.get('message', '').lower()  # convert to lowercase
 
-        predefined = {
+        # Keyword-based predefined responses
+        predefined_keywords = {
+            # Greetings
             "hi": "Hello! How can I assist you today?",
             "hello": "Hi there! Need any help?",
             "hey": "Hey! How can I help you?",
@@ -35,407 +29,307 @@ def chat(request):
             "thank you": "Glad I could help!",
             "bye": "Goodbye! Have a nice day!",
             "goodbye": "See you later! Stay safe!",
-            #Company & About
-            "what is one aim": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim kya hai": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim company ke baare me batao": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim kis kaam ki company hai": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim kya karti hai": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim ka kaam kya hai": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim kya service deti hai": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "ye one aim kya hai bhai": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "mujhe one aim ke baare me janna hai": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim kon si services provide karti hai": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "company ka naam one aim kyu rakha hai": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim kis field me kaam karti hai": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim IT company hai kya": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim technology company hai kya": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "technical one aim company details": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "one aim it solutions": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            "what is one aim ": "One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology. Visit us at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a> to know more.",
-            #
-            "tell me about your company": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "company ke baare me batao": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "apni company ke baare me btao": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "one aim company kya karti hai": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "tumhari company kis kaam ki hai": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "company kis field me kaam karti hai": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "aap log kya services provide karte ho": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "apki company kya karti hai": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "your company details": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "company introduction": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "give me info about your company": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "what's your company about": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "can you tell me about your company": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "who are you guys": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "your company services kya hai": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "company information": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "about your company": "We are One Aim IT Solutions — a team of professionals helping businesses grow through website development, mobile apps, AI tools, and cloud-based digital solutions. We deliver customized, modern, and result-driven services to meet your unique goals. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            #
-            "what do you guys do": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "tum log kya karte ho": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "tumhara kaam kya hai": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "aap log kis kaam ke ho": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "company kya karti hai": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "aap kya services dete ho": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "aap log kaam kya karte ho": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "what kind of work do you do": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "what services do you offer": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "explain your work": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "kaam kya karte ho aap log": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "company ka kaam kya hai": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "what is your business": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "aapki service kya hai": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            "what does your business do": "We at One Aim IT Solutions help businesses grow by building websites, mobile apps, AI-based tools, and offering cloud & digital services. We make sure your business goes digital the right way. Know more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>.",
-            #
-            "who are you": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aap kaun ho": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "tum kaun ho": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "company kaun si hai": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ye chatbot kiski hai": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "kisne banaya chatbot": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aap kis company se ho": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "which company are you from": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "introduce yourself": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "tell me who you are": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "chatbot kaun ho tum": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "kya naam hai tumhara": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "apni pehchan batao": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "you belong to which company": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "tumhari company kaun si hai": "We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            "what does your company specialize in": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "tumhari company kya karti hai": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aapki company kya kaam karti hai": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "kya kaam hai aapke company ka": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aap log kya service dete ho": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "what services do you provide": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "what does One Aim do": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "specialization kya hai aapki": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "which field is your company in": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aapka kaam kya hai": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "company kis line me kaam karti hai": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "kis type ke project banate ho": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "what industry is One Aim in": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "what kind of work do you do": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "company me kya banate ho": "We specialize in building websites, apps, AI solutions, and providing digital growth services. Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
+            "name": "Nice Name! How can I assist you today?",
+            "ok": "Alright! Feel free to ask more about our company or services.",
+            "okay": "Alright! Feel free to ask more about our company or services.",
 
-            #Web & App Development
-            #Web & App Development
-            "kya aap website banate ho": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe website banwani hai": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aap log website banate ho kya": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "business website bana doge kya": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you make websites": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "website development karte ho": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "website banwana hai": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you provide website design": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you build a business website": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ek achi website chahiye": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "responsive website banaoge": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aapki company website banati hai kya": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you create websites for startups": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "website banane ka kaam karte ho": "Yes! We design and develop fast, responsive, and modern websites. Learn more 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            "i want a website for my business": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe apne business ke liye website chahiye": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri dukan ke liye website banani hai": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ek website chahiye business ke liye": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you build a website for my company": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "apne kaam ke liye website chahiye": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri company ke liye website chahiye": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "business grow karne ke liye website chahiye": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "website banwani hai apne kaam ke liye": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you help me with a website for my business": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ek personal business site chahiye": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "start up ke liye website chahiye": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri services ke liye ek site chahiye": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "want to launch business website": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "website chahiye jisme mera pura business ho": "Sure! We create custom websites based on your business needs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            "can you make an e-commerce website": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe ek shopping website banwani hai": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri shop ke liye online website bana do": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you develop an online store": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "online dukan wali website ban sakti hai kya": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you make online shopping websites": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "shopping ke liye website chahiye": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you build an ecommerce portal": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe product bechne wali website chahiye": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ek site chahiye jisme log product kharid sake": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "i want an ecommerce site with payment options": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you design a shopping cart website": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri grocery ke liye ecommerce site banani hai": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "payment gateway wali site bana sakte ho kya": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you build ecommerce website for clothing business": "Yes, we develop full-featured e-commerce websites with payment gateways and inventory. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            "can you make mobile apps": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe ek mobile app banwani hai": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "kya aap mobile application banate ho": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you develop mobile apps": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "app chahiye business ke liye": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "i need an android app": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you make an ios application": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri company ke liye app banani hai": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mobile app banana hai business ke liye": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "startup ke liye app banwa sakte ho kya": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you provide mobile development services": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ek app chahiye jo playstore pe ho": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mobile application banani hai online dukan ke liye": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "android aur ios dono app bana sakte ho": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mobile app chahiye delivery service ke liye": "Yes, we build Android and iOS apps for all kinds of businesses. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            "i need an app for my startup": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "startup ke liye ek app banani hai": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri nayi company ke liye app chahiye": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you build an app for my startup": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "i’m launching a startup and need an app": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "startup ke liye mobile application chahiye": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "new business ke liye app chahiye": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri startup idea ke liye ek app banwani hai": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you offer app development for startups": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you help my startup with an app": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "startup ke liye playstore app chahiye": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mobile app for new business chahiye": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "naya business shuru kiya hai, app banani hai": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "i need help building an app for my startup": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you work with startups for app development": "We can help! We specialize in building startup-friendly mobile applications. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            #AI/ML & Automation
-            #AI/ML & Automation
-            "kya aap AI service dete ho": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aapke paas artificial intelligence services hain kya": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you build ai tools": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you have ai solutions": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "kya chatbot bana dete ho": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aap log automation ka kaam karte ho kya": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you help me with ai integration": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ai tool chahiye business ke liye": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you create prediction models": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ml tools banate ho kya": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "artificial intelligence me kaam karte ho kya": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aap ai chatbot bana sakte ho kya": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you offer intelligent automation services": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ai automation services chahiye": "Yes, we offer AI/ML solutions like chatbots, automation, and prediction tools. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            "can you create a chatbot": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "kya aap chatbot bana sakte ho": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "chatbot banwana hai business ke liye": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "aap chatbot development karte ho kya": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you develop ai chatbots": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you help with chatbot design": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "support chatbot banate ho kya": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ai chatbot chahiye website ke liye": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe chatbot chahiye customer support ke liye": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "e-commerce chatbot bana sakte ho": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you make a whatsapp chatbot": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "facebook messenger chatbot banate ho": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "business chatbot chahiye mujhe": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "automated chatbot bana doge kya": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "voice ya text chatbot banate ho kya": "Yes! We build smart chatbots for websites, support, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            "i want ai for my business": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mere business ke liye ai chahiye": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "business me ai lagwana hai": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ai chahiye business ke liye": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you add ai to my business": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you automate my business with ai": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe business ke liye smart automation chahiye": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ai tools banana hai business ke liye": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "business ka kaam easy karne ke liye ai chahiye": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you improve workflow using ai": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "machine learning system chahiye company ke liye": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe apne office ke liye ai solution chahiye": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "automate karna hai kuch cheezein ai se": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ai integration chahiye apne system me": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can ai help my business run better": "We can build AI tools that automate tasks and improve your workflow. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            "do you offer machine learning solutions": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "machine learning provide karte ho kya": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ml ka solution chahiye": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "machine learning chahiye data ke liye": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you build ml models": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you help with machine learning": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ml solution de sakte ho": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "data analysis ke liye machine learning chahiye": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "machine learning model banana hai": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ml ke tools banate ho kya": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you automate using machine learning": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "prediction system chahiye ml se": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "machine learning ka kaam karte ho kya": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "analytics ke liye ml model chahiye": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ml based automation chahiye business me": "Yes, we create ML models for data analysis, predictions, and automation. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            #Cloud & Digital Solutions
-            #Cloud & Digital Solutions
-            "kya aap cloud ka kaam karte ho": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud service provide karte ho kya": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud ke through website chala sakte ho kya": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud integration karte ho kya": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud hosting available hai kya": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "deploy karne me madad karoge cloud pe": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud setup karoge kya": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you offer aws or cloud services": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud par project host karwa sakte ho kya": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud migration karte ho": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud application banate ho kya": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud pe kaam hota hai kya aapka": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you manage cloud infrastructure": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "business ka data cloud pe le ja sakte ho": "Yes, we offer cloud integration, hosting, and deployment services. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            "can you help me go online": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "online business setup karwa doge": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe online le jaoge kya": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri dukaan online karwa sakte ho kya": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you take my business online": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "website, app, marketing sab karte ho kya": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe poora online setup chahiye": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "online dhandha shuru karna hai help karoge": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "digitally kaise grow karein batao": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri shop ka online version bana do": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe ek poori digital team chahiye": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud aur website dono chahiye": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "full service digital setup milega kya": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you help take my startup online": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "ghar baithe business chalu karwana hai": "Absolutely! We help with websites, apps, cloud hosting, and digital marketing. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            "do you provide digital solutions": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "kya aap digital solution dete ho": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "pure digital setup karwate ho kya": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "digitally grow karna hai help milegi": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "cloud aur automation provide karte ho": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "kya tumhare paas koi digital package hai": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "poori digital help chahiye business ke liye": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "do you offer end-to-end digital services": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "automation aur cloud dono chahiye": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "what kind of digital solutions do you offer": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "can you help us with cloud and automation": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "mujhe apne kaam ko digital banana hai": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "technology ke through kaam asaan karna hai": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "kya tum automation service bhi dete ho": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            "meri company ko digital banana hai": "Yes, from cloud platforms to automation tools, we offer full digital support. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-            #
-            #Consulting & Industries
-            #Consulting & Industries
-           "kya aap log sabhi businesses ke liye kaam karte ho": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "kaunse field ke clients ke liye aap kaam karte ho": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "aapka kaam kin industries mein hota hai": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "do you serve retail and education": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "what sectors do you cover": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "aap kis kis shetra mein service dete ho": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "do you provide solutions for education industry": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "mera business retail ka hai, kya aap help karoge": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "healthcare business ke liye solution chahiye": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "do you support logistics companies": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "kya education institute ke liye koi digital service hai": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "kaun kaun se industries ke saath kaam kiya hai": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "industries served by your company": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "aapka client base kis type ka hai": "We work with healthcare, education, retail, logistics, and more. Explore our services at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           #
-           "which type of companies do you help": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "aap kis type ke business ke liye kaam karte ho": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "startup ke liye aapki service hai kya": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "bade company ke liye bhi kaam karte ho kya": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "do you work with small businesses": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "do you provide services to large enterprises": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "aap kis-kis company ke saath kaam karte ho": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "kya aap naye business ke liye solution dete ho": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "aapka target client kaun hota hai": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "who do you work with mostly": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "what size companies do you support": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "kya choti dukan ke liye bhi website banate ho": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "new business ke liye app bana sakte ho kya": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "do you handle enterprise level projects": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "kya aap SMEs ke saath kaam karte ho": "We help startups, SMEs, and enterprises looking for tech growth solutions. Visit us 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           #
-           "do you offer tech consulting": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "kya aap tech mein salah dete ho": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "business mein technology kaise use kare, aap batate ho kya": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "aap consultancy dete ho kya": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "kya aap business ko technology mein guide karte ho": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "do you provide technology consultation": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "can you advise me on tech for my business": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "kya aap bata sakte ho kaunsa software mere business ke liye best hoga": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "can i get IT consulting from you": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "aap tech consulting ke service dete ho kya": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "do you give software advice for businesses": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "kya aap meri company ko digital banane mein madad kar sakte ho": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "i need a consultant for tech growth": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "tech consulting chahiye apke paas hai kya": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           "aap bataoge ki meri company ke liye kaunsi technology sahi hai": "Yes, we guide businesses on how to use tech to grow and save costs. Visit 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>",
-           #
-           #Location & Contact
-           "how can i contact you": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "how to contact you": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "what is your contact number": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "contact details please": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "kahan contact karein aap se": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "aapse baat kaise hogi": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "your contact info": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "how can i reach you": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "i want to talk to someone": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "can you give your phone number": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "contact karna hai aapko": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "how to get in touch with your team": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "aapka number kya hai": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "email or phone number do": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-           "company se baat kaise karein": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-            #
-            "how can i reach you": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-            "how to contact you": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-            "contact us": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-            "contact": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-            "how to reach your team":"You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-            "ham aapse contact kaise kare": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-            #
-            "where is your office": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "what is your office address": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "where are you located": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "your company location": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "head office address": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "location of your office": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "where is your head office": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "company ka address kya hai": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "aapka office kahan hai": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "jaipur mein kahan hai aapka office": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "office location kya hai": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "aapki location kya hai": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "company ka location": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "office kahan par hai": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "can i visit your office": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!"
-            #
-            "where are you located" "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "where is your company based": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "where is your office located": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "where is your company located": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "where is your company": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "location of your company": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "location": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "where is your office situated": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "where are you based": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
+            # About One Aim IT Solutions
+            "one aim": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
+                          🌐 <a href='https://theoneaim.in' target='_blank'>Visit our website for more details →</a>""",
+            "oneaim": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
+                          🌐 <a href='https://theoneaim.in' target='_blank'>Visit our website for more details →</a>""",
+            "one aim it solutions": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
+                          🌐 <a href='https://theoneaim.in' target='_blank'>Visit our website for more details →</a>""",
+            "oneaimitsolutions": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
+                          🌐 <a href='https://theoneaim.in' target='_blank'>Visit our website for more details →</a>""",
+            "one aim it solution": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
+                          🌐 <a href='https://theoneaim.in' target='_blank'>Visit our website for more details →</a>""",
             
-            #Why Choose One Aim
-            #Why Choose One Aim
-            "why should i choose one aim": "We deliver tailored, scalable, and high-quality tech solutions with full support.",
-            "what makes you different": "We combine innovation with business understanding to build the best digital products.",
-            "do you offer custom solutions": "Yes, everything we build is tailored to your business needs.",
+            "company": """We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services.<br><br>
+                          Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>""",
+            "about": """We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services.<br><br>
+                          Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>""",
+            "organization": """We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services.<br><br>
+                          Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>""",
 
+
+            #services
+            "services": """Absolutely! ONE AIM provides a wide range of modern IT services designed to drive innovation and growth.<br>
+                          ☁️ Cloud Services<br>
+                          💻 Web Development<br>
+                          🤖 AI/ML<br>
+                          📈 Digital Marketing<br><br>
+                          ✨ <a href='https://theoneaim.in' target='_blank'>Discover how our services can transform your business →</a>""",
+            "service": """Absolutely! ONE AIM provides a wide range of modern IT services designed to drive innovation and growth.<br>
+                          ☁️ Cloud Services<br>
+                          💻 Web Development<br>
+                          🤖 AI/ML<br>
+                          📈 Digital Marketing<br><br>
+                          ✨ <a href='https://theoneaim.in' target='_blank'>Discover how our services can transform your business →</a>""",
+           
+            # Cloud Services
+            "cloud services": """☁️ <b>Cloud Services</b><br>
+                                 We help businesses scale with secure, cost-effective cloud solutions.<br><br>
+                                 - Cloud Migration<br>
+                                 - DevOps & Automation<br>
+                                 - Infrastructure Management<br>
+                                 - Cloud Security<br><br>
+                                🔗 <a href='https://theoneaim.in/cloud-services' target='_blank'>Explore</a>""",
+
+            "cloud service": """☁️ <b>Cloud Services</b><br>
+                                We help businesses scale with secure, cost-effective cloud solutions.<br><br>
+                                - Cloud Migration<br>
+                                - DevOps & Automation<br>
+                                - Infrastructure Management<br>
+                                - Cloud Security<br><br>
+                               🔗 <a href='https://theoneaim.in/cloud-services' target='_blank'>Explore</a>""",
+            "cloud ": """☁️ <b>Cloud Services</b><br>
+                               We help businesses scale with secure, cost-effective cloud solutions.<br><br>
+                               - Cloud Migration<br>
+                               - DevOps & Automation<br>
+                               - Infrastructure Management<br>
+                               - Cloud Security<br><br>
+                              🔗 <a href='https://theoneaim.in/cloud-services' target='_blank'>Explore</a>""",
+
+            "aws cloud": """☁️ <b>Cloud Services</b><br>
+                                We help businesses scale with secure, cost-effective cloud solutions.<br><br>
+                               - Cloud Migration<br>
+                               - DevOps & Automation<br>
+                               - Infrastructure Management<br>
+                               - Cloud Security<br><br>
+                              🔗 <a href='https://theoneaim.in/cloud-services' target='_blank'>Explore</a>""",
+
+            # Web Development
+            "web development": """💻 <b>Web Development</b><br>
+                                   ONE AIM builds high-performance, scalable websites and platforms tailored to your business needs.<br><br>
+                                  - Responsive Web Applications<br>
+                                  - Custom Web Solutions<br>
+                                  - UI/UX Design<br>
+                                  - E-Commerce Development<br>
+                                  - API Integration & Backend Services<br><br>
+                                  🔗 <a href='https://theoneaim.in/development-services' target='_blank'>Explore Web Development</a>""",
+            "web dev": """💻 <b>Web Development</b><br>
+                                   ONE AIM builds high-performance, scalable websites and platforms tailored to your business needs.<br><br>
+                                  - Responsive Web Applications<br>
+                                  - Custom Web Solutions<br>
+                                  - UI/UX Design<br>
+                                  - E-Commerce Development<br>
+                                  - API Integration & Backend Services<br><br>
+                                  🔗 <a href='https://theoneaim.in/development-services' target='_blank'>Explore Web Development</a>""",
+            "website": """💻 <b>Web Development</b><br>
+                                   ONE AIM builds high-performance, scalable websites and platforms tailored to your business needs.<br><br>
+                                  - Responsive Web Applications<br>
+                                  - Custom Web Solutions<br>
+                                  - UI/UX Design<br>
+                                  - E-Commerce Development<br>
+                                  - API Integration & Backend Services<br><br>
+                                  🔗 <a href='https://theoneaim.in/development-services' target='_blank'>Explore Web Development</a>""",
+            "web application": """💻 <b>Web Development</b><br>
+                                   ONE AIM builds high-performance, scalable websites and platforms tailored to your business needs.<br><br>
+                                  - Responsive Web Applications<br>
+                                  - Custom Web Solutions<br>
+                                  - UI/UX Design<br>
+                                  - E-Commerce Development<br>
+                                  - API Integration & Backend Services<br><br>
+                                  🔗 <a href='https://theoneaim.in/development-services' target='_blank'>Explore Web Development</a>""",
+            "web": """💻 <b>Web Development</b><br>
+                                   ONE AIM builds high-performance, scalable websites and platforms tailored to your business needs.<br><br>
+                                  - Responsive Web Applications<br>
+                                  - Custom Web Solutions<br>
+                                  - UI/UX Design<br>
+                                  - E-Commerce Development<br>
+                                  - API Integration & Backend Services<br><br>
+                                  🔗 <a href='https://theoneaim.in/development-services' target='_blank'>Explore Web Development</a>""",
+
+            # AI/ML Services
+            "ai/ml": """🤖 <b>AI/ML Services</b><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        🔍 AI Consultation<br>
+                        🧠 ML Model Development<br>
+                        🛠️ Data Engineering & Preprocessing<br>
+                        📊 Predictive Analytics & Business Intelligence<br>
+                        🤖 AI Chatbots & Virtual Assistants<br>
+                        🔄 Workflow Automation & Smart Integration<br><br>
+                        🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
+            "ai": """🤖 <b>AI/ML Services</b><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        🔍 AI Consultation<br>
+                        🧠 ML Model Development<br>
+                        🛠️ Data Engineering & Preprocessing<br>
+                        📊 Predictive Analytics & Business Intelligence<br>
+                        🤖 AI Chatbots & Virtual Assistants<br>
+                        🔄 Workflow Automation & Smart Integration<br><br>
+                        🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
+            "ml": """🤖 <b>AI/ML Services</b><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        🔍 AI Consultation<br>
+                        🧠 ML Model Development<br>
+                        🛠️ Data Engineering & Preprocessing<br>
+                        📊 Predictive Analytics & Business Intelligence<br>
+                        🤖 AI Chatbots & Virtual Assistants<br>
+                        🔄 Workflow Automation & Smart Integration<br><br>
+                        🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
+            "ai and ml": """🤖 <b>AI/ML Services</b><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        🔍 AI Consultation<br>
+                        🧠 ML Model Development<br>
+                        🛠️ Data Engineering & Preprocessing<br>
+                        📊 Predictive Analytics & Business Intelligence<br>
+                        🤖 AI Chatbots & Virtual Assistants<br>
+                        🔄 Workflow Automation & Smart Integration<br><br>
+                        🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
+            "ai & ml": """🤖 <b>AI/ML Services</b><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        🔍 AI Consultation<br>
+                        🧠 ML Model Development<br>
+                        🛠️ Data Engineering & Preprocessing<br>
+                        📊 Predictive Analytics & Business Intelligence<br>
+                        🤖 AI Chatbots & Virtual Assistants<br>
+                        🔄 Workflow Automation & Smart Integration<br><br>
+                        🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
+            "ai/ml": """🤖 <b>AI/ML Services</b><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        🔍 AI Consultation<br>
+                        🧠 ML Model Development<br>
+                        🛠️ Data Engineering & Preprocessing<br>
+                        📊 Predictive Analytics & Business Intelligence<br>
+                        🤖 AI Chatbots & Virtual Assistants<br>
+                        🔄 Workflow Automation & Smart Integration<br><br>
+                        🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
+            "automation": """🤖 <b>AI/ML Services</b><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        🔍 AI Consultation<br>
+                        🧠 ML Model Development<br>
+                        🛠️ Data Engineering & Preprocessing<br>
+                        📊 Predictive Analytics & Business Intelligence<br>
+                        🤖 AI Chatbots & Virtual Assistants<br>
+                        🔄 Workflow Automation & Smart Integration<br><br>
+                        🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
+            "machine learning": """🤖 <b>AI/ML Services</b><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        🔍 AI Consultation<br>
+                        🧠 ML Model Development<br>
+                        🛠️ Data Engineering & Preprocessing<br>
+                        📊 Predictive Analytics & Business Intelligence<br>
+                        🤖 AI Chatbots & Virtual Assistants<br>
+                        🔄 Workflow Automation & Smart Integration<br><br>
+                        🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
+
+            # Digital Marketing
+            "digital marketing": """📈 <b>Digital Marketing</b><br>
+                                    Grow your brand online with ONE AIM's data-driven digital marketing strategies that maximize reach, engagement, and ROI.<br><br>
+                                    🔍 SEO Optimization (On-page & Off-page)<br>
+                                    📱 Social Media Marketing (Instagram, Facebook, LinkedIn)<br>
+                                    🎯 Performance Campaigns (Google Ads, Meta Ads)<br>
+                                    📝 Content Strategy & Blogging<br>
+                                    📧 Email Marketing & Lead Nurturing<br>
+                                    📈 Analytics & Conversion Tracking<br><br>
+                                    🔗 <a href='https://theoneaim.in/digital-marketing' target='_blank'>Explore Digital Marketing</a>""",
+            "digital": """📈 <b>Digital Marketing</b><br>
+                                    Grow your brand online with ONE AIM's data-driven digital marketing strategies that maximize reach, engagement, and ROI.<br><br>
+                                    🔍 SEO Optimization (On-page & Off-page)<br>
+                                    📱 Social Media Marketing (Instagram, Facebook, LinkedIn)<br>
+                                    🎯 Performance Campaigns (Google Ads, Meta Ads)<br>
+                                    📝 Content Strategy & Blogging<br>
+                                    📧 Email Marketing & Lead Nurturing<br>
+                                    📈 Analytics & Conversion Tracking<br><br>
+                                    🔗 <a href='https://theoneaim.in/digital-marketing' target='_blank'>Explore Digital Marketing</a>""",
+           
+            # about us
+            #  🐦 <a href='https://twitter.com/OneAimIT' target='_blank'>Twitter</a><br>  ( ye abhi nahi hai hamari website me to baad me hoga tab integrate karna hai)
+            "know more": """🏢 <b>Know more about our organization</b><br>
+                            We’d love to connect with you on social media! Find us on your favorite platforms:<br><br>
+                            🔗 <a href='https://www.linkedin.com/company/oneaim-it-solutions/posts/?feedView=all' target='_blank'>LinkedIn</a><br>
+                            📸 <a href='https://www.instagram.com/oneaimitsolutions/' target='_blank'>Instagram</a><br>
+                            📘 <a href='https://www.facebook.com/profile.php?id=61575261976224' target='_blank'>Facebook</a><br>
+                            ▶️ <a href='https://www.youtube.com/@OneAimITSolutions' target='_blank'>YouTube</a>""",
+            "social media": """🏢 <b>Know more about our organization</b><br>
+                            We’d love to connect with you on social media! Find us on your favorite platforms:<br><br>
+                            🔗 <a href='https://www.linkedin.com/company/oneaim-it-solutions/posts/?feedView=all' target='_blank'>LinkedIn</a><br>
+                            📸 <a href='https://www.instagram.com/oneaimitsolutions/' target='_blank'>Instagram</a><br>
+                            📘 <a href='https://www.facebook.com/profile.php?id=61575261976224' target='_blank'>Facebook</a><br>
+                            ▶️ <a href='https://www.youtube.com/@OneAimITSolutions' target='_blank'>YouTube</a>""",
+            "instagram": """🏢 <b>Know more about our organization</b><br>
+                            We’d love to connect with you on social media! Find us on your favorite platforms:<br><br>
+                            🔗 <a href='https://www.linkedin.com/company/oneaim-it-solutions/posts/?feedView=all' target='_blank'>LinkedIn</a><br>
+                            📸 <a href='https://www.instagram.com/oneaimitsolutions/' target='_blank'>Instagram</a><br>
+                            📘 <a href='https://www.facebook.com/profile.php?id=61575261976224' target='_blank'>Facebook</a><br>
+                            ▶️ <a href='https://www.youtube.com/@OneAimITSolutions' target='_blank'>YouTube</a>""",
+            "youtube": """🏢 <b>Know more about our organization</b><br>
+                            We’d love to connect with you on social media! Find us on your favorite platforms:<br><br>
+                            🔗 <a href='https://www.linkedin.com/company/oneaim-it-solutions/posts/?feedView=all' target='_blank'>LinkedIn</a><br>
+                            📸 <a href='https://www.instagram.com/oneaimitsolutions/' target='_blank'>Instagram</a><br>
+                            📘 <a href='https://www.facebook.com/profile.php?id=61575261976224' target='_blank'>Facebook</a><br>
+                            ▶️ <a href='https://www.youtube.com/@OneAimITSolutions' target='_blank'>YouTube</a>""",
+            "facebook": """🏢 <b>Know more about our organization</b><br>
+                            We’d love to connect with you on social media! Find us on your favorite platforms:<br><br>
+                            🔗 <a href='https://www.linkedin.com/company/oneaim-it-solutions/posts/?feedView=all' target='_blank'>LinkedIn</a><br>
+                            📸 <a href='https://www.instagram.com/oneaimitsolutions/' target='_blank'>Instagram</a><br>
+                            📘 <a href='https://www.facebook.com/profile.php?id=61575261976224' target='_blank'>Facebook</a><br>
+                            ▶️ <a href='https://www.youtube.com/@OneAimITSolutions' target='_blank'>YouTube</a>""",
+            "linkedin": """🏢 <b>Know more about our organization</b><br>
+                            We’d love to connect with you on social media! Find us on your favorite platforms:<br><br>
+                            🔗 <a href='https://www.linkedin.com/company/oneaim-it-solutions/posts/?feedView=all' target='_blank'>LinkedIn</a><br>
+                            📸 <a href='https://www.instagram.com/oneaimitsolutions/' target='_blank'>Instagram</a><br>
+                            📘 <a href='https://www.facebook.com/profile.php?id=61575261976224' target='_blank'>Facebook</a><br>
+                            ▶️ <a href='https://www.youtube.com/@OneAimITSolutions' target='_blank'>YouTube</a>""",
+            "twitter": """🏢 <b>Know more about our organization</b><br>
+                            We’d love to connect with you on social media! Find us on your favorite platforms:<br><br>
+                            🔗 <a href='https://www.linkedin.com/company/oneaim-it-solutions/posts/?feedView=all' target='_blank'>LinkedIn</a><br>
+                            📸 <a href='https://www.instagram.com/oneaimitsolutions/' target='_blank'>Instagram</a><br>
+                            📘 <a href='https://www.facebook.com/profile.php?id=61575261976224' target='_blank'>Facebook</a><br>
+                            ▶️ <a href='https://www.youtube.com/@OneAimITSolutions' target='_blank'>YouTube</a>""",
+
+            # Industry-specific
+            "industries": """🌐 <b>Industries We Are In</b><br>
+                              We provide industry-specific technology solutions. Choose your industry of interest:<br><br>
+                             🚗 <a href='https://theoneaim.in/automobile' target='_blank'>Automobile</a><br>
+                             📞 <a href='https://theoneaim.in/telecommunication' target='_blank'>Telecommunications</a><br>
+                             🏥 <a href='https://theoneaim.in/healthcare' target='_blank'>Healthcare</a><br>
+                             🛒 <a href='https://theoneaim.in/e-commerce' target='_blank'>E-Commerce</a><br>
+                             💰 <a href='https://theoneaim.in/finance-&-banking' target='_blank'>Finance & Banking</a><br>
+                             🎓 <a href='https://theoneaim.in/education' target='_blank'>Education</a><br>
+                             🛡️ <a href='https://theoneaim.in/government-&-defense' target='_blank'>Government & Defense</a>""",
+            "industry": """🌐 <b>Industries We Are In</b><br>
+                              We provide industry-specific technology solutions. Choose your industry of interest:<br><br>
+                             🚗 <a href='https://theoneaim.in/automobile' target='_blank'>Automobile</a><br>
+                             📞 <a href='https://theoneaim.in/telecommunication' target='_blank'>Telecommunications</a><br>
+                             🏥 <a href='https://theoneaim.in/healthcare' target='_blank'>Healthcare</a><br>
+                             🛒 <a href='https://theoneaim.in/e-commerce' target='_blank'>E-Commerce</a><br>
+                             💰 <a href='https://theoneaim.in/finance-&-banking' target='_blank'>Finance & Banking</a><br>
+                             🎓 <a href='https://theoneaim.in/education' target='_blank'>Education</a><br>
+                             🛡️ <a href='https://theoneaim.in/government-&-defense' target='_blank'>Government & Defense</a>""",
+
+            #location
+            "address": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
+            "located": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
+            "location": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
+            "map": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",        
+            "rasta": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
+            "location": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
+            #contact
+            "call": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
+            "contact": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
+            "connect": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
+            "calling": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
+ 
         }
 
-        if user_message.lower() in predefined:
-            bot_reply = predefined[user_message.lower()]
-        else:
-            try:
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo-0125",
-                    messages=[{"role": "user", "content": user_message}]
-                )
-                bot_reply = response.choices[0].message.content.strip()
-            except Exception as e:
-                print("Error in OpenAI call:", traceback.format_exc())
-                bot_reply = f"Sorry, something went wrong: {str(e)}"
+        # Matching logic — check if any keyword is in the user message
+        matched = False
+        for keyword, answer in predefined_keywords.items():
+            if keyword in user_message:
+                bot_reply = answer
+                matched = True
+                break
 
+        # Fallback if nothing matched
+        if not matched:
+            bot_reply = "Something went wrong. Please only ask about One Aim IT Solutions."
+
+        # ✅ Save to database
         ChatMessage.objects.create(user_message=user_message, bot_response=bot_reply)
 
         return JsonResponse({'reply': bot_reply})
+    
     return JsonResponse({'reply': 'Invalid request method.'}, status=400)
