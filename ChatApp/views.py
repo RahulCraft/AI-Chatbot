@@ -47,8 +47,6 @@ def chat(request):
             
             "company": """We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services.<br><br>
                           Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>""",
-            "about": """We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services.<br><br>
-                          Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>""",
             "organization": """We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services.<br><br>
                           Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>""",
 
