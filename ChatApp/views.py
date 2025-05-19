@@ -34,20 +34,27 @@ def chat(request):
             "okay": "Alright! Feel free to ask more about our company or services.",
 
             # About One Aim IT Solutions
-            "one aim": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
+            "one aim": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, 
+            app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
                           🌐 <a href='https://theoneaim.in' target='_blank'>Visit our website for more details →</a>""",
-            "oneaim": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
+            "oneaim": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, 
+            app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
                           🌐 <a href='https://theoneaim.in' target='_blank'>Visit our website for more details →</a>""",
-            "one aim it solutions": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
+            "one aim it solutions": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, 
+            app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
                           🌐 <a href='https://theoneaim.in' target='_blank'>Visit our website for more details →</a>""",
-            "oneaimitsolutions": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
+            "oneaimitsolutions": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, 
+            app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
                           🌐 <a href='https://theoneaim.in' target='_blank'>Visit our website for more details →</a>""",
-            "one aim it solution": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
+            "one aim it solution": """One Aim is a modern IT solutions company that helps businesses grow digitally with services like web development, 
+            app development, AI tools, and cloud solutions. We focus on delivering custom, scalable, and innovative technology.<br><br>
                           🌐 <a href='https://theoneaim.in' target='_blank'>Visit our website for more details →</a>""",
             
-            "company": """We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services.<br><br>
+            "company": """We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, 
+            apps, AI tools, and digital services.<br><br>
                           Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>""",
-            "organization": """We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, apps, AI tools, and digital services.<br><br>
+            "organization": """We’re One Aim IT Solutions – experts in tech-driven business transformation. We help businesses grow with websites, 
+            apps, AI tools, and digital services.<br><br>
                           Learn more at 👉 <a href='https://theoneaim.in' target='_blank'>theoneaim.in</a>""",
 
 
@@ -141,7 +148,8 @@ def chat(request):
 
             # AI/ML Services
             "ai/ml": """🤖 <b>AI/ML Services</b><br>
-                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience 
+                        using Artificial Intelligence and Machine Learning technologies.<br><br>
                         🔍 AI Consultation<br>
                         🧠 ML Model Development<br>
                         🛠️ Data Engineering & Preprocessing<br>
@@ -150,7 +158,8 @@ def chat(request):
                         🔄 Workflow Automation & Smart Integration<br><br>
                         🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
             "ai": """🤖 <b>AI/ML Services</b><br>
-                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer 
+                        experience using Artificial Intelligence and Machine Learning technologies.<br><br>
                         🔍 AI Consultation<br>
                         🧠 ML Model Development<br>
                         🛠️ Data Engineering & Preprocessing<br>
@@ -159,7 +168,8 @@ def chat(request):
                         🔄 Workflow Automation & Smart Integration<br><br>
                         🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
             "ml": """🤖 <b>AI/ML Services</b><br>
-                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer 
+                        experience using Artificial Intelligence and Machine Learning technologies.<br><br>
                         🔍 AI Consultation<br>
                         🧠 ML Model Development<br>
                         🛠️ Data Engineering & Preprocessing<br>
@@ -168,7 +178,8 @@ def chat(request):
                         🔄 Workflow Automation & Smart Integration<br><br>
                         🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
             "ai and ml": """🤖 <b>AI/ML Services</b><br>
-                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer 
+                        experience using Artificial Intelligence and Machine Learning technologies.<br><br>
                         🔍 AI Consultation<br>
                         🧠 ML Model Development<br>
                         🛠️ Data Engineering & Preprocessing<br>
@@ -177,7 +188,8 @@ def chat(request):
                         🔄 Workflow Automation & Smart Integration<br><br>
                         🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
             "ai & ml": """🤖 <b>AI/ML Services</b><br>
-                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer 
+                        experience using Artificial Intelligence and Machine Learning technologies.<br><br>
                         🔍 AI Consultation<br>
                         🧠 ML Model Development<br>
                         🛠️ Data Engineering & Preprocessing<br>
@@ -186,7 +198,8 @@ def chat(request):
                         🔄 Workflow Automation & Smart Integration<br><br>
                         🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
             "ai/ml": """🤖 <b>AI/ML Services</b><br>
-                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer 
+                        experience using Artificial Intelligence and Machine Learning technologies.<br><br>
                         🔍 AI Consultation<br>
                         🧠 ML Model Development<br>
                         🛠️ Data Engineering & Preprocessing<br>
@@ -195,7 +208,8 @@ def chat(request):
                         🔄 Workflow Automation & Smart Integration<br><br>
                         🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
             "automation": """🤖 <b>AI/ML Services</b><br>
-                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer 
+                        experience using Artificial Intelligence and Machine Learning technologies.<br><br>
                         🔍 AI Consultation<br>
                         🧠 ML Model Development<br>
                         🛠️ Data Engineering & Preprocessing<br>
@@ -204,7 +218,8 @@ def chat(request):
                         🔄 Workflow Automation & Smart Integration<br><br>
                         🔗 <a href='https://theoneaim.in/ai-ml-services' target='_blank'>Explore AI/ML Services</a>""",
             "machine learning": """🤖 <b>AI/ML Services</b><br>
-                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer experience using Artificial Intelligence and Machine Learning technologies.<br><br>
+                        ONE AIM delivers intelligent, data-driven solutions that enhance automation, decision-making, and customer 
+                        experience using Artificial Intelligence and Machine Learning technologies.<br><br>
                         🔍 AI Consultation<br>
                         🧠 ML Model Development<br>
                         🛠️ Data Engineering & Preprocessing<br>
@@ -215,7 +230,8 @@ def chat(request):
 
             # Digital Marketing
             "digital marketing": """📈 <b>Digital Marketing</b><br>
-                                    Grow your brand online with ONE AIM's data-driven digital marketing strategies that maximize reach, engagement, and ROI.<br><br>
+                                    Grow your brand online with ONE AIM's data-driven digital marketing strategies that 
+                                    maximize reach, engagement, and ROI.<br><br>
                                     🔍 SEO Optimization (On-page & Off-page)<br>
                                     📱 Social Media Marketing (Instagram, Facebook, LinkedIn)<br>
                                     🎯 Performance Campaigns (Google Ads, Meta Ads)<br>
@@ -224,7 +240,8 @@ def chat(request):
                                     📈 Analytics & Conversion Tracking<br><br>
                                     🔗 <a href='https://theoneaim.in/digital-marketing' target='_blank'>Explore Digital Marketing</a>""",
             "digital": """📈 <b>Digital Marketing</b><br>
-                                    Grow your brand online with ONE AIM's data-driven digital marketing strategies that maximize reach, engagement, and ROI.<br><br>
+                                    Grow your brand online with ONE AIM's data-driven digital marketing strategies that maximize 
+                                    reach, engagement, and ROI.<br><br>
                                     🔍 SEO Optimization (On-page & Off-page)<br>
                                     📱 Social Media Marketing (Instagram, Facebook, LinkedIn)<br>
                                     🎯 Performance Campaigns (Google Ads, Meta Ads)<br>
@@ -299,15 +316,25 @@ def chat(request):
                              🛡️ <a href='https://theoneaim.in/government-&-defense' target='_blank'>Government & Defense</a>""",
 
             #location
-            "address": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "located": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "location": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "map": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",        
-            "rasta": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
-            "location": "📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, Jaipur, India<br><br>We also serve clients across the globe!",
+            "address": """📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, 
+                        Jaipur, India<br><br>We also serve clients across the globe!""",
+            "located":  """📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, 
+                        Jaipur, India<br><br>We also serve clients across the globe!""",            
+            "location": """📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, 
+                        Jaipur, India<br><br>We also serve clients across the globe!""",
+            "map": """📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, 
+                        Jaipur, India<br><br>We also serve clients across the globe!""",        
+            "rasta": """📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, 
+                          Jaipur, India<br><br>We also serve clients across the globe!""",
+            "location": """📍 <strong>Office Address:</strong><br>Office No-123, Omega<br>Anukampa, Near Sanskrit College<br>Bhankrota, 
+                             Jaipur, India<br><br>We also serve clients across the globe!""",
             #contact
             "call": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
-            "contact": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
+            "contact": """You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;
+                        &nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120
+                        <br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong>
+                        <br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>
+                        We’re here to help you anytime!""",
             "connect": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
             "calling": "You can contact us through the following ways:<br><br>📞 <strong>Phone:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;+91 89552 49714<br>&nbsp;&nbsp;&nbsp;&nbsp;+91 74269 95879<br>&nbsp;&nbsp;&nbsp;&nbsp;+1 (925) 389-4120<br><br>✉️ <strong>Email:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;info@theoneaim.co.in<br><br>🌐 <strong>Website:</strong><br>&nbsp;&nbsp;&nbsp;&nbsp;<a href='https://theoneaim.in/contact' target='_blank'>Visit our Contact Us page</a><br><br>We’re here to help you anytime!",
  
@@ -330,7 +357,8 @@ def chat(request):
         # Fallback if nothing matched
         if not matched:
             #bot_reply = "Something went wrong. Please only ask about One Aim IT Solutions."
-            bot_reply = """Thanks for your question! We provide real-time information about One Aim IT Solutions—our services, solutions, and company updates. For other queries, 
+            bot_reply = """Thanks for your question! We provide real-time information about One Aim IT Solutions—our services, 
+                           solutions, and company updates. For other queries, 
                            please <a href='https://theoneaim.in/contact' target='_blank'>contact our team here</a>."""
 
         # ✅ Save to database
